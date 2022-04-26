@@ -1,7 +1,9 @@
+import Home from "./pages/Home";
+
 function App() {
   return (
     <div className="App">
-      <div className="text-3xl font-bold underline">Hello world!</div>
+      <Home />
     </div>
   );
 }
