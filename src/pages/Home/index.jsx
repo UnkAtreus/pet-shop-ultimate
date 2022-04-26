@@ -2,14 +2,18 @@ import React from "react";
 import { pokemon } from "../../data/pokemon";
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { useWeb3React } from "@web3-react/core";
+import { ethers } from "ethers";
+
+import Pokemon from "../../contracts/Pokemon.json";
 
 function Home() {
-  const contact = process.env.REACT_APP_CONTACT_ADDRESS;
-  const { active, account, library, connector, activate, deactivate, chainId } =
+  const contract = process.env.REACT_APP_CONTACT_ADDRESS;
+
+  const { active, account, connector, activate, deactivate, chainId } =
     useWeb3React();
 
   const Injected = new InjectedConnector({
-    supportedChainIds: [1, 3, 4, 5, 42],
+    supportedChainIds: [1, 56, 1337],
   });
 
   function padLeadingZeros(num, size) {
@@ -24,6 +28,45 @@ function Home() {
     return s;
   }
 
+  async function catchePokemon(id, amount) {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const pokemonContract = new ethers.Contract(
+          contract,
+          Pokemon.abi,
+          signer
+        );
+        let pokemonTxn = await pokemonContract.catchPokemon(id, amount, {
+          from: account,
+          value: ethers.utils.parseEther("0.01"),
+        });
+
+        console.log("Mining... please wait");
+        await pokemonTxn.wait();
+
+        console.log(
+          `Mined, see transaction: https://rinkeby.etherscan.io/tx/${pokemonTxn.hash}`
+        );
+      } else {
+        console.log("Ethereum object does not exist");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    // const pokemonContract = new web3.eth.Contract(Pokemon.abi, contact);
+    // return pokemonContract.methods
+    //   .catchPokemon(id, amount, { from: account, gas: 3000000, value: amount })
+    //   .call()
+    //   .then((res) => {
+    //     console.log("success");
+    //     console.log(res);
+    //   });
+  }
+
   const Pokeball =
     "https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/Others/pokedex.png";
 
@@ -32,22 +75,30 @@ function Home() {
       <header className="h-16 shadow-lg fixed w-full bg-white">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
           <div className="text-xl font-medium">Pokémon Shop</div>
-          <button
-            onClick={() => {
-              activate(Injected);
-            }}
-            className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
-          >
-            Connect Wallet
-          </button>
-          <button onClick={deactivate}>Disconnect</button>
+          {!active ? (
+            <button
+              onClick={() => {
+                activate(Injected);
+              }}
+              className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
+            >
+              Connect Metamask
+            </button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <span>🦊</span>
+              <div className="text-base font-medium">
+                {`${account.substring(0, 6)}...${account.substring(
+                  account.length - 4,
+                  account.length
+                )}`}
+              </div>
+            </div>
+          )}
         </div>
       </header>
       <div className="pt-16"></div>
       <main className="bg-slate-50">
-        <div>{`Connection Status: ${active}`}</div>
-        <div>{`Account: ${account}`}</div>
-        <div>{`Network ID: ${chainId}`}</div>
         <section>
           <div className="max-w-screen-xl m-auto p-4">
             <div className="grid grid-cols-5 gap-4">
@@ -102,7 +153,10 @@ function Home() {
 
                     <div className="flex justify-between items-center">
                       <div className="text-neutral-400"># {data.id}</div>
-                      <button className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg">
+                      <button
+                        onClick={() => catchePokemon(data.id, 100)}
+                        className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
+                      >
                         <img className="h-6" src={Pokeball} alt="Pokeball" />
                         Cache!!
                       </button>

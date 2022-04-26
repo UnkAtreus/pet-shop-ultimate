@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-var Adoption = artifacts.require("Adoption");
+var Pokemon = artifacts.require("Pokemon");
 
 module.exports = function (deployer) {
-  deployer.deploy(Adoption);
+  deployer.deploy(Pokemon);
 };
