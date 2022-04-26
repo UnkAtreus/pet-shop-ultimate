@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { pokemon } from "../../data/pokemon";
+import { pokemon } from "../../data/pokemon2";
 import getWeb3 from "../../services/getWeb3";
 // import { BigNumber } from "bignumber.js";
 
@@ -9,7 +9,7 @@ function Home() {
   const [web3, setWeb3] = React.useState(null);
   const [account, setAccount] = React.useState(null);
   const [contract, setContract] = React.useState(null);
-
+  const [pokemonTaken, setPokemonTaken] = React.useState([]);
   useEffect(() => {
     initial();
   }, []);
@@ -53,7 +53,16 @@ function Home() {
 
     // Get the value from the contract to prove it worked.
     if (contract) {
+      let pokemonTaken = [];
       const response = await contract.methods.getOwners().call();
+      console.log(response);
+      response.forEach((owner, index) => {
+        if (owner != "0x0000000000000000000000000000000000000000") {
+          pokemonTaken.push(index);
+        }
+      });
+      console.log(pokemonTaken);
+      setPokemonTaken(pokemonTaken);
     }
     // Update state with the result.
     // this.setState({ storageValue: response });
@@ -71,11 +80,9 @@ function Home() {
     return s;
   }
 
-  async function catchPokemon(id, amount) {
+  async function catchPokemon(id, price) {
     if (contract) {
-      const price = amount.toString(16);
-      const amountToSend = web3.utils.toWei(price, "ether");
-      console.log(id);
+      const amountToSend = web3.utils.toWei(price.toString(), "ether");
       contract.methods
         .catchPokemon(id, amountToSend)
         .send(
@@ -123,68 +130,72 @@ function Home() {
         <section>
           <div className="max-w-screen-xl m-auto p-4">
             <div className="grid grid-cols-5 gap-4">
-              {pokemon.map((data, index) => (
-                <div
-                  key={`pokecard__${index}`}
-                  className="shadow-md rounded-lg bg-white"
-                >
-                  <div className="flex justify-between items-center px-4 pt-4 pb-2">
-                    <div className="text-lg font-medium">
-                      {data.name.english}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {data.type.map((element, index) => (
-                        <span key={`pokecard__${index}`} className="">
-                          <img
-                            className=""
-                            src={`https://raw.githubusercontent.com/itsjavi/pokemon-assets/main/assets/img/symbols/type-${element.toLocaleLowerCase()}-badge-32px.png`}
-                            alt=""
-                          />
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mx-4">
-                    <img
-                      src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${padLeadingZeros(
-                        data.id,
-                        3
-                      )}.png`}
-                      alt={data.name.english}
-                    />
-                  </div>
-                  <div className="px-4 py-2">
-                    <div className="mb-2 bg-green-400 text-white w-full text-center rounded-md border-2 border-green-500 text-sm">
-                      {data.base.hp}/{data.base.hp}
-                    </div>
-                    <div className="mb-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <div>ATK</div>
-                        <div className="">{data.base.attack}</div>
+              {pokemon
+                .filter((data, index) => {
+                  return !pokemonTaken.includes(index);
+                })
+                .map((data, index) => (
+                  <div
+                    key={`pokecard__${index}`}
+                    className="shadow-md rounded-lg bg-white"
+                  >
+                    <div className="flex justify-between items-center px-4 pt-4 pb-2">
+                      <div className="text-lg font-medium">
+                        {data.name.english}
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <div>DEF</div>
-                        <div className="">{data.base.defense}</div>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <div>SPD</div>
-                        <div className="">{data.base.speed}</div>
+                      <div className="flex items-center gap-1">
+                        {data.type.map((element, index) => (
+                          <span key={`pokecard__${index}`} className="">
+                            <img
+                              className=""
+                              src={`https://raw.githubusercontent.com/itsjavi/pokemon-assets/main/assets/img/symbols/type-${element.toLocaleLowerCase()}-badge-32px.png`}
+                              alt=""
+                            />
+                          </span>
+                        ))}
                       </div>
                     </div>
+                    <div className="mx-4">
+                      <img
+                        src={`https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${padLeadingZeros(
+                          data.id,
+                          3
+                        )}.png`}
+                        alt={data.name.english}
+                      />
+                    </div>
+                    <div className="px-4 py-2">
+                      <div className="mb-2 bg-green-400 text-white w-full text-center rounded-md border-2 border-green-500 text-sm">
+                        {data.base.hp}/{data.base.hp}
+                      </div>
+                      <div className="mb-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <div>ATK</div>
+                          <div className="">{data.base.attack}</div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <div>DEF</div>
+                          <div className="">{data.base.defense}</div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <div>SPD</div>
+                          <div className="">{data.base.speed}</div>
+                        </div>
+                      </div>
 
-                    <div className="flex justify-between items-center">
-                      <div className="text-neutral-400"># {data.id}</div>
-                      <button
-                        onClick={() => catchPokemon(data.id, 1)}
-                        className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
-                      >
-                        <img className="h-6" src={Pokeball} alt="Pokeball" />
-                        Cache!!
-                      </button>
+                      <div className="flex justify-between items-center">
+                        <div className="text-neutral-400"># {data.id}</div>
+                        <button
+                          onClick={() => catchPokemon(data.id, data.price)}
+                          className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
+                        >
+                          <img className="h-6" src={Pokeball} alt="Pokeball" />
+                          Cache!!
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </section>
