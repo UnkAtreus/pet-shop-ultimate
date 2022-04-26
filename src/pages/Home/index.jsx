@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { pokemon } from "../../data/pokemon";
 import getWeb3 from "../../services/getWeb3";
-import { BigNumber } from "bignumber.js";
+// import { BigNumber } from "bignumber.js";
 
 import PokemonContract from "../../contracts/Pokemon.json";
 
@@ -23,7 +23,6 @@ function Home() {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
-      // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
 
       // Get the contract instance.
@@ -34,9 +33,6 @@ function Home() {
         deployedNetwork && deployedNetwork.address
       );
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      // this.setState({ web3, accounts, contract: instance }, this.runExample);
       setWeb3(web3);
       setAccount(accounts[0]);
       setContract(instance);
@@ -58,7 +54,6 @@ function Home() {
     // Get the value from the contract to prove it worked.
     if (contract) {
       const response = await contract.methods.getOwners().call();
-      console.log(response);
     }
     // Update state with the result.
     // this.setState({ storageValue: response });
@@ -76,12 +71,20 @@ function Home() {
     return s;
   }
 
-  async function catchePokemon(id, amount) {
+  async function catchPokemon(id, amount) {
     if (contract) {
-      const response = await contract.methods
-        .catchPokemon(id, BigNumber(1000000000000000000))
-        .call();
-      console.log(response);
+      const price = amount.toString(16);
+      const amountToSend = web3.utils.toWei(price, "ether");
+      console.log(id);
+      contract.methods
+        .catchPokemon(id, amountToSend)
+        .send(
+          { from: account, gas: 50000, value: amountToSend },
+          (error, transactionHash) => {
+            console.log(error);
+            console.log(transactionHash);
+          }
+        );
     }
   }
 
@@ -172,7 +175,7 @@ function Home() {
                     <div className="flex justify-between items-center">
                       <div className="text-neutral-400"># {data.id}</div>
                       <button
-                        onClick={() => catchePokemon(data.id, 100)}
+                        onClick={() => catchPokemon(data.id, 1)}
                         className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                       >
                         <img className="h-6" src={Pokeball} alt="Pokeball" />
