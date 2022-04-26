@@ -1,7 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { pokemon } from "../../data/pokemon";
+import { InjectedConnector } from "@web3-react/injected-connector";
+import { useWeb3React } from "@web3-react/core";
+
 function Home() {
-  useEffect(() => {}, []);
+  const contact = process.env.REACT_APP_CONTACT_ADDRESS;
+  const { active, account, library, connector, activate, deactivate, chainId } =
+    useWeb3React();
+
+  const Injected = new InjectedConnector({
+    supportedChainIds: [1, 3, 4, 5, 42],
+  });
 
   function padLeadingZeros(num, size) {
     var s = num + "";
@@ -23,13 +32,22 @@ function Home() {
       <header className="h-16 shadow-lg fixed w-full bg-white">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
           <div className="text-xl font-medium">Pokémon Shop</div>
-          <button className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200">
+          <button
+            onClick={() => {
+              activate(Injected);
+            }}
+            className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
+          >
             Connect Wallet
           </button>
+          <button onClick={deactivate}>Disconnect</button>
         </div>
       </header>
       <div className="pt-16"></div>
       <main className="bg-slate-50">
+        <div>{`Connection Status: ${active}`}</div>
+        <div>{`Account: ${account}`}</div>
+        <div>{`Network ID: ${chainId}`}</div>
         <section>
           <div className="max-w-screen-xl m-auto p-4">
             <div className="grid grid-cols-5 gap-4">
@@ -84,7 +102,7 @@ function Home() {
 
                     <div className="flex justify-between items-center">
                       <div className="text-neutral-400"># {data.id}</div>
-                      <button className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 text-white px-4 py-2 gap-2 text-base rounded-lg">
+                      <button className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg">
                         <img className="h-6" src={Pokeball} alt="Pokeball" />
                         Cache!!
                       </button>
