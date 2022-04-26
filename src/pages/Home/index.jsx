@@ -1,24 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { pokemon } from "../../data/pokemon";
 import getWeb3 from "../../services/getWeb3";
+import { BigNumber } from "bignumber.js";
 
 import PokemonContract from "../../contracts/Pokemon.json";
 
 function Home() {
-  // const contract = process.env.REACT_APP_CONTACT_ADDRESS;
-  // const [value , setValue] =
   const [web3, setWeb3] = React.useState(null);
   const [account, setAccount] = React.useState(null);
   const [contract, setContract] = React.useState(null);
 
-  // state = { storageValue: 0, web3: null, accounts: null, contract: null };
-  // const []
-  // const { active, account, connector, activate, deactivate, chainId } =
-  //   useWeb3React();
+  useEffect(() => {
+    initial();
+  }, []);
 
-  // const Injected = new InjectedConnector({
-  //   supportedChainIds: [1, 56, 1337],
-  // });
+  useEffect(() => {
+    runExample();
+  }, [contract]);
+
   async function initial() {
     try {
       // Get network provider and web3 instance.
@@ -39,7 +38,7 @@ function Home() {
       // example of interacting with the contract's methods.
       // this.setState({ web3, accounts, contract: instance }, this.runExample);
       setWeb3(web3);
-      setAccount(accounts);
+      setAccount(accounts[0]);
       setContract(instance);
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -51,16 +50,18 @@ function Home() {
   }
 
   async function runExample() {
-    const { accounts, contract } = this.state;
+    // const { accounts, contract } = this.state;
 
     // Stores a given value, 5 by default.
     // await contract.methods.set(5).send({ from: accounts[0] });
 
     // Get the value from the contract to prove it worked.
-    const response = await contract.methods.getOwners().call();
-    console.log(response);
+    if (contract) {
+      const response = await contract.methods.getOwners().call();
+      console.log(response);
+    }
     // Update state with the result.
-    this.setState({ storageValue: response });
+    // this.setState({ storageValue: response });
   }
 
   function padLeadingZeros(num, size) {
@@ -75,73 +76,14 @@ function Home() {
     return s;
   }
 
-  // async function catchePokemon(id, amount) {
-  //   try {
-  //     // Get network provider and web3 instance.
-  //     const web3 = await getWeb3();
-
-  //     // Use web3 to get the user's accounts.
-  //     const accounts = await web3.eth.getAccounts();
-
-  //     // Get the contract instance.
-  //     const networkId = await web3.eth.net.getId();
-  //     const deployedNetwork = Pokemon.networks[networkId];
-  //     const instance = new web3.eth.Contract(
-  //       Pokemon.abi,
-  //       deployedNetwork && deployedNetwork.address
-  //     );
-  //     const response = await instance.methods.getOwners().call();
-  //     console.log(response);
-  //   } catch (error) {
-  //     // Catch any errors for any of the above operations.
-  //     alert(
-  //       `Failed to load web3, accounts, or contract. Check console for details.`
-  //     );
-  //     console.error(error);
-  //   }
-  // try {
-  //   const { ethereum } = window;
-  //   console.log("0");
-
-  //   if (ethereum) {
-  //     console.log("1");
-  //     const provider = new ethers.providers.Web3Provider(ethereum);
-  //     console.log("2");
-  //     const signer = provider.getSigner();
-  //     console.log("3");
-  //     const pokemonContract = new ethers.Contract(
-  //       contract,
-  //       Pokemon.abi,
-  //       signer
-  //     );
-  //     console.log("4");
-  //     let pokemonTxn = await pokemonContract.catchPokemon(id, amount, {
-  //       from: account,
-  //       value: ethers.utils.parseEther("0.01"),
-  //     });
-  //     console.log("5");
-
-  //     console.log("Mining... please wait");
-  //     await pokemonTxn.wait();
-
-  //     console.log(
-  //       `Mined, see transaction: https://rinkeby.etherscan.io/tx/${pokemonTxn.hash}`
-  //     );
-  //   } else {
-  //     console.log("Ethereum object does not exist");
-  //   }
-  // } catch (error) {
-  //   console.log(error);
-  // }
-  // const pokemonContract = new web3.eth.Contract(Pokemon.abi, contact);
-  // return pokemonContract.methods
-  //   .catchPokemon(id, amount, { from: account, gas: 3000000, value: amount })
-  //   .call()
-  //   .then((res) => {
-  //     console.log("success");
-  //     console.log(res);
-  //   });
-  // }
+  async function catchePokemon(id, amount) {
+    if (contract) {
+      const response = await contract.methods
+        .catchPokemon(id, BigNumber(1000000000000000000))
+        .call();
+      console.log(response);
+    }
+  }
 
   const Pokeball =
     "https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/Others/pokedex.png";
@@ -151,16 +93,16 @@ function Home() {
       <header className="h-16 shadow-lg fixed w-full bg-white">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
           <div className="text-xl font-medium">Pokémon Shop</div>
-          {/* {!active ? ( */}
-          <button
-            // onClick={() => {
-            //   activate(Injected);
-            // }}
-            className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
-          >
-            Connect Metamask
-          </button>
-          {/* ) : (
+          {!account ? (
+            <button
+              // onClick={() => {
+              //   activate(Injected);
+              // }}
+              className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
+            >
+              Connect Metamask
+            </button>
+          ) : (
             <div className="flex items-center space-x-2">
               <span>🦊</span>
               <div className="text-base font-medium">
@@ -170,7 +112,7 @@ function Home() {
                 )}`}
               </div>
             </div>
-          )} */}
+          )}
         </div>
       </header>
       <div className="pt-16"></div>
@@ -230,7 +172,7 @@ function Home() {
                     <div className="flex justify-between items-center">
                       <div className="text-neutral-400"># {data.id}</div>
                       <button
-                        // onClick={() => catchePokemon(data.id, 100)}
+                        onClick={() => catchePokemon(data.id, 100)}
                         className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                       >
                         <img className="h-6" src={Pokeball} alt="Pokeball" />

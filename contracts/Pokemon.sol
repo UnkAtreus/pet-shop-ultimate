@@ -22,7 +22,7 @@ contract Pokemon {
     }
 
     function catchPokemon(uint16 _pokemonId, uint256 _amount) public payable {
-        require(msg.value == _amount, "Need to send exact amount of wei");
+        // require(msg.value == _amount, "Need to send exact amount of wei");
         require(owners[_pokemonId] != msg.sender);
         require(owners[_pokemonId] != address(0x0));
         require(_pokemonId >= 0 && _pokemonId <= pokenmonAmount);
