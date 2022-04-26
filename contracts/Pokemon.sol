@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.5.16;
 
-contract Adoption {
+contract Pokemon {
     address[809] public owners;
 
     mapping(address => uint256[3]) public defenders;
