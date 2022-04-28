@@ -44,8 +44,9 @@ contract Pokemon {
         require(owners[_pokeId] == _owner);
         require(owners[_pokeId] != address(0x0));
         require(_pokeId >= 0 && _pokeId <= pokemonAmount);
-
-        defenders[_owner][_index] = _pokeId;
+        // Need to +1 because of initial array value = 0
+        defenders[_owner][_index] = _pokeId + 1;
+        
     }
 
     function removeDefender(address _owner, uint256 _index) public {
