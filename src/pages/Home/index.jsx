@@ -1,16 +1,18 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useContext } from "react";
 import { pokemon } from "../../data/pokemon2";
 import getWeb3 from "../../services/getWeb3";
-// import { BigNumber } from "bignumber.js";
-
+import { toast } from "react-toastify";
 import PokemonContract from "../../contracts/Pokemon.json";
+import { Link } from "react-router-dom";
+import { Context } from "../../utilities/context";
 
 function Home() {
-  const [web3, setWeb3] = React.useState(null);
-  const [account, setAccount] = React.useState(null);
-  const [contract, setContract] = React.useState(null);
   const [pokemonTaken, setPokemonTaken] = React.useState([]);
-  const [isPurchase, setIsPurchase] = React.useState(false);
+
+  const [context, setContext] = useContext(Context);
+
+  const { web3, account, contract } = context;
+
   useEffect(() => {
     initial();
   }, []);
@@ -19,11 +21,11 @@ function Home() {
     runExample();
   }, [contract, account]);
 
-  async function getAccount() {
-    const web3 = await getWeb3();
-    const accounts = await web3.eth.getAccounts();
-    setAccount(accounts[0]);
-  }
+  // async function getAccount() {
+  //   const web3 = await getWeb3();
+  //   const accounts = await web3.eth.getAccounts();
+  //   setAccount(accounts[0]);
+  // }
 
   async function initial() {
     try {
@@ -40,9 +42,14 @@ function Home() {
         deployedNetwork && deployedNetwork.address
       );
 
-      setWeb3(web3);
-      setAccount(accounts[0]);
-      setContract(instance);
+      // setWeb3(web3);
+      // setAccount(accounts[0]);
+      // setContract(instance);
+      setContext({
+        web3: web3,
+        account: accounts[0],
+        contract: instance,
+      });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -79,20 +86,26 @@ function Home() {
     return s;
   }
 
-  async function catchPokemon(id, price) {
-    if (contract) {
-      const amountToSend = web3.utils.toWei(price.toString(), "ether");
-      contract.methods
-        .catchPokemon(id, amountToSend)
-        .send(
-          { from: account, gas: 50000, value: amountToSend },
-          (error, transactionHash) => {
-            console.log(error);
-            console.log(transactionHash);
-          }
-        );
-    }
-  }
+  const catchPokemon = (id, price) =>
+    new Promise((resolve, reject) => {
+      if (contract) {
+        const amountToSend = web3.utils.toWei(price.toString(), "ether");
+        contract.methods
+          .catchPokemon(id, amountToSend)
+          .send(
+            { from: account, gas: 50000, value: amountToSend },
+            (error, transactionHash) => {
+              console.log(error);
+              console.log(transactionHash);
+              if (transactionHash) {
+                setPokemonTaken((pokemonTaken) => [...pokemonTaken, id - 1]);
+                resolve();
+              }
+              reject(error);
+            }
+          );
+      }
+    });
 
   const Pokeball =
     "https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/Others/pokedex.png";
@@ -102,24 +115,32 @@ function Home() {
       <header className="h-16 shadow-lg fixed w-full bg-white">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
           <div className="text-xl font-medium">Pokémon Shop</div>
-          {!account ? (
-            <button
-              onClick={getAccount}
-              className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
-            >
-              Connect Metamask
-            </button>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <span>🦊</span>
-              <div className="text-base font-medium">
-                {`${account.substring(0, 6)}...${account.substring(
-                  account.length - 4,
-                  account.length
-                )}`}
-              </div>
-            </div>
-          )}
+          <div className="flex space-x-4">
+            {!account ? (
+              <button
+                onClick={initial}
+                className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
+              >
+                Connect Metamask
+              </button>
+            ) : (
+              <>
+                <div className="flex items-center cursor-pointer">
+                  <Link to={`/profile`}>Inventory</Link>
+                </div>
+                <div className="h-8 w-[1px] bg-slate-300 "></div>
+                <div className="flex items-center space-x-2">
+                  <span>🦊</span>
+                  <div className="text-base font-medium">
+                    {`${account.substring(0, 6)}...${account.substring(
+                      account.length - 4,
+                      account.length
+                    )}`}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
       <div className="pt-16"></div>
@@ -183,7 +204,13 @@ function Home() {
                       <div className="flex justify-between items-center">
                         <div className="text-neutral-400"># {data.id}</div>
                         <button
-                          onClick={() => catchPokemon(data.id, data.price)}
+                          onClick={() =>
+                            toast.promise(catchPokemon(data.id, data.price), {
+                              pending: "Catching...",
+                              success: "Caught!",
+                              error: "Failed to catch!",
+                            })
+                          }
                           className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                         >
                           <img className="h-6" src={Pokeball} alt="Pokeball" />
