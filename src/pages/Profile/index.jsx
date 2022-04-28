@@ -1,14 +1,19 @@
-import React, { useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useContext } from "react";
 import getWeb3 from "../../services/getWeb3";
 import PokemonContract from "../../contracts/Pokemon.json";
 import { pokemon } from "../../data/pokemon2";
 import { Link } from "react-router-dom";
+import { Context } from "../../utilities/context";
+import BackCard from "../../images/back_card.jpg";
+
 function Profile() {
-  // const [web3, setWeb3] = React.useState(null);
-  const [account, setAccount] = React.useState(null);
-  const [contract, setContract] = React.useState(null);
   const [pokemonTaken, setPokemonTaken] = React.useState([]);
   const [pokemonDefend, setPokemonDefend] = React.useState([]);
+
+  const [context, setContext] = useContext(Context);
+
+  const { web3, account, contract } = context;
 
   useEffect(() => {
     initial();
@@ -17,31 +22,35 @@ function Profile() {
   useEffect(() => {
     fetchPokemonTaken();
     fetchPokemonDefend();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contract]);
 
   async function initial() {
-    try {
-      // Get network provider and web3 instance.
-      const web3 = await getWeb3();
+    if (account === null) {
+      try {
+        // Get network provider and web3 instance.
+        const web3 = await getWeb3();
 
-      const accounts = await web3.eth.getAccounts();
+        const accounts = await web3.eth.getAccounts();
 
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = PokemonContract.networks[networkId];
-      const instance = new web3.eth.Contract(
-        PokemonContract.abi,
-        deployedNetwork && deployedNetwork.address
-      );
-
-      // setWeb3(web3);
-      setAccount(accounts[0]);
-      setContract(instance);
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`
-      );
-      console.error(error);
+        const networkId = await web3.eth.net.getId();
+        const deployedNetwork = PokemonContract.networks[networkId];
+        const instance = new web3.eth.Contract(
+          PokemonContract.abi,
+          deployedNetwork && deployedNetwork.address
+        );
+        setContext({
+          web3: web3,
+          account: accounts[0],
+          contract: instance,
+        });
+      } catch (error) {
+        // Catch any errors for any of the above operations.
+        alert(
+          `Failed to load web3, accounts, or contract. Check console for details.`
+        );
+        console.error(error);
+      }
     }
   }
 
@@ -67,41 +76,51 @@ function Profile() {
     }
   }
 
-  async function addPokemonDefend(id) {
-    if (contract) {
-      const index = pokemonDefend.findIndex((pokemonId) => pokemonId === 0);
-      if (index >= 0 && index < 3) {
-        if (!pokemonDefend.includes(id)) {
-          contract.methods
-            .addDefender(account, index, id)
-            .send({ from: account }, (error, transactionHash) => {
-              console.log(error);
-              if (error) {
-                // error
-              }
-              if (transactionHash) {
-                // Completed
-              }
-            });
+  const addPokemonDefend = async (id) =>
+    new Promise((resolve, reject) => {
+      if (contract) {
+        const index = pokemonDefend.findIndex((pokemonId) => pokemonId === -1);
+        console.log(index);
+        if (index >= 0 && index < 3) {
+          if (!pokemonDefend.includes(id)) {
+            contract.methods
+              .addDefender(account, index, id)
+              .send({ from: account }, (error, transactionHash) => {
+                if (transactionHash) {
+                  // Completed
+                  console.log(transactionHash);
+                  resolve();
+                }
+                if (error) {
+                  // error
+                  console.log(error);
+                  reject(error);
+                }
+              });
+          }
         }
       }
-    }
-  }
+    });
 
-  async function removePokemonDefend(index) {
-    if (contract) {
-      if (index >= 0 && index < 3) {
-        contract.methods.removeDefender(account, index).send(
-          { from: account },
-          (error, transactionHash) => {
-            console.log(error);
-            console.log(transactionHash);
-          }
-          // { from: account, gas: 50000 },
-        );
+  const removePokemonDefend = async (index) =>
+    new Promise((resolve, reject) => {
+      if (contract) {
+        if (index >= 0 && index < 3) {
+          contract.methods.removeDefender(account, index).send(
+            { from: account },
+            (error, transactionHash) => {
+              if (transactionHash) {
+                resolve();
+              }
+              if (error) {
+                reject(error);
+              }
+            }
+            // { from: account, gas: 50000 },
+          );
+        }
       }
-    }
-  }
+    });
 
   function padLeadingZeros(num, size) {
     var s = num + "";
@@ -119,42 +138,50 @@ function Profile() {
 
   return (
     <>
-      <header className="h-16 shadow-lg fixed w-full bg-white">
+      <header className="h-16 shadow-lg fixed w-full bg-white z-10">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
           <div className="text-xl font-medium">
             <Link to={"/"}>Pokémon Shop</Link>
           </div>
-          {!account ? (
-            <button
-              // onClick={() => {
-              //   activate(Injected);
-              // }}
-              className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
-            >
-              Connect Metamask
-            </button>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <span>🦊</span>
-              <div className="text-base font-medium">
-                {`${account.substring(0, 6)}...${account.substring(
-                  account.length - 4,
-                  account.length
-                )}`}
-              </div>
-            </div>
-          )}
+          <div className="flex space-x-4">
+            {!account ? (
+              <button
+                onClick={initial}
+                className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
+              >
+                Connect Metamask
+              </button>
+            ) : (
+              <>
+                <div className="flex items-center cursor-pointer">
+                  <Link to={`/profile`}>Inventory</Link>
+                </div>
+                <div className="h-8 w-[1px] bg-slate-300 "></div>
+                <div className="flex items-center space-x-2">
+                  <span>🦊</span>
+                  <div className="text-base font-medium">
+                    {`${account.substring(0, 6)}...${account.substring(
+                      account.length - 4,
+                      account.length
+                    )}`}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
       <div className="pt-16"></div>
       <main className="bg-slate-50 min-h-screen">
         <section>
           <div className="max-w-screen-xl m-auto p-4">
-            <div className="rounded-md border-black border-2 p-4">
-              <div className="grid grid-cols-5">
-                <div></div>
+            <div className="rounded-md py-12 shadow-lg mb-12 bg-white">
+              <div className="text-center text-5xl font-medium mb-12 ">
+                Pokémon Defender
+              </div>
+              <div className="grid grid-cols-3 gap-12 max-w-screen-lg m-auto h-[490px]">
                 {pokemonDefend.map((pokemonId, index) => {
-                  if (pokemonId != -1) {
+                  if (pokemonId !== -1) {
                     return (
                       <div
                         key={`pokecard__${index + 888}`}
@@ -232,15 +259,19 @@ function Profile() {
                     );
                   } else {
                     return (
-                      <div className="col-span-1">
-                        <div className="flex justify-center items-center">
-                          <img src={Pokeball} alt="" />
-                        </div>
+                      <div
+                        className="overflow-hidden rounded-lg border-4 "
+                        key={`pokecard__${index + 888}`}
+                      >
+                        <img
+                          src={Pokeball}
+                          alt=""
+                          className="object-cover h-full scale-125 opacity-50"
+                        />
                       </div>
                     );
                   }
                 })}
-                <div></div>
               </div>
             </div>
             <div className="grid grid-cols-5 gap-4">
