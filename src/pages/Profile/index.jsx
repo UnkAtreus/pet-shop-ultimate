@@ -75,6 +75,7 @@ function Profile() {
       const response = await contract.methods.getDefender(account).call();
       const pokemons = response.map((val) => val - 1);
       setPokemonDefend(pokemons);
+      console.log(`fetchPokemon: ${pokemons}`);
     }
   }
 
@@ -89,16 +90,12 @@ function Profile() {
               .addDefender(account, index, id)
               .send({ from: account }, (error, transactionHash) => {
                 if (transactionHash) {
-                  // Completed
-                  console.log(transactionHash);
                   const newPokemonDefend = [...pokemonDefend];
-                  newPokemonDefend[index] = id;
-                  console.log(`addPokemonDefend: ${newPokemonDefend}`);
+                  newPokemonDefend[index] = id - 1;
                   setPokemonDefend(newPokemonDefend);
                   resolve();
                 }
                 if (error) {
-                  // error
                   console.log(error);
                   reject(error);
                 }
@@ -193,7 +190,7 @@ function Profile() {
               <div className="grid grid-cols-3 gap-12 max-w-screen-lg m-auto h-[490px]">
                 {pokemonDefend.map((id, index) => {
                   if (id !== -1) {
-                    const pokemonId = id + 1;
+                    const pokemonId = id;
                     return (
                       <div
                         key={`pokecard__${index + 888}`}

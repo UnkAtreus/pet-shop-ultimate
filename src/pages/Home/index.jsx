@@ -63,13 +63,11 @@ function Home() {
     if (contract) {
       let pokemonTaken = [];
       const response = await contract.methods.getOwners().call();
-      // console.log(response);
       response.forEach((owner, index) => {
         if (owner !== "0x0000000000000000000000000000000000000000") {
           pokemonTaken.push(index);
         }
       });
-      console.log(pokemonTaken);
       setPokemonTaken(pokemonTaken);
     }
   };
@@ -95,8 +93,6 @@ function Home() {
           .send(
             { from: account, gas: 50000, value: amountToSend },
             (error, transactionHash) => {
-              console.log(error);
-              console.log(transactionHash);
               if (transactionHash) {
                 setPokemonTaken((pokemonTaken) => [...pokemonTaken, id - 1]);
                 resolve();
