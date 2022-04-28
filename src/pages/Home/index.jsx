@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { pokemon } from "../../data/pokemon2";
 import getWeb3 from "../../services/getWeb3";
 // import { BigNumber } from "bignumber.js";
@@ -10,13 +10,20 @@ function Home() {
   const [account, setAccount] = React.useState(null);
   const [contract, setContract] = React.useState(null);
   const [pokemonTaken, setPokemonTaken] = React.useState([]);
+  const [isPurchase, setIsPurchase] = React.useState(false);
   useEffect(() => {
     initial();
   }, []);
 
   useEffect(() => {
     runExample();
-  }, [contract]);
+  }, [contract, account]);
+
+  async function getAccount() {
+    const web3 = await getWeb3();
+    const accounts = await web3.eth.getAccounts();
+    setAccount(accounts[0]);
+  }
 
   async function initial() {
     try {
@@ -45,28 +52,20 @@ function Home() {
     }
   }
 
-  async function runExample() {
-    // const { accounts, contract } = this.state;
-
-    // Stores a given value, 5 by default.
-    // await contract.methods.set(5).send({ from: accounts[0] });
-
-    // Get the value from the contract to prove it worked.
+  const runExample = async () => {
     if (contract) {
       let pokemonTaken = [];
       const response = await contract.methods.getOwners().call();
-      console.log(response);
+      // console.log(response);
       response.forEach((owner, index) => {
-        if (owner != "0x0000000000000000000000000000000000000000") {
+        if (owner !== "0x0000000000000000000000000000000000000000") {
           pokemonTaken.push(index);
         }
       });
       console.log(pokemonTaken);
       setPokemonTaken(pokemonTaken);
     }
-    // Update state with the result.
-    // this.setState({ storageValue: response });
-  }
+  };
 
   function padLeadingZeros(num, size) {
     var s = num + "";
@@ -105,9 +104,7 @@ function Home() {
           <div className="text-xl font-medium">Pokémon Shop</div>
           {!account ? (
             <button
-              // onClick={() => {
-              //   activate(Injected);
-              // }}
+              onClick={getAccount}
               className="bg-blue-500 rounded-lg text-white px-4 py-2 hover:bg-blue-400 transition-all duration-200"
             >
               Connect Metamask
@@ -190,7 +187,7 @@ function Home() {
                           className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                         >
                           <img className="h-6" src={Pokeball} alt="Pokeball" />
-                          Cache!!
+                          {data.price.toFixed(2)} ETH
                         </button>
                       </div>
                     </div>

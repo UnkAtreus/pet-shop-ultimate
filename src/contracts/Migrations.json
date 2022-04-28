@@ -74,7 +74,7 @@
   "sourceMap": "58:526:0:-;;;227:56;8:9:-1;5:2;;;30:1;27;20:12;5:2;227:56:0;266:10;258:5;;:18;;;;;;;;;;;;;;;;;;58:526;;;;;;",
   "deployedSourceMap": "58:526:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;58:526:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;407:175;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;407:175:0;;;;;;;;;;;;;;;;;;;:::i;:::-;;110:39;;;:::i;:::-;;;;;;;;;;;;;;;;;;;84:20;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;289:112;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;289:112:0;;;;;;;;;;;;;;;;;:::i;:::-;;407:175;206:5;;;;;;;;;;;192:19;;:10;:19;;;188:26;;;473:19;506:11;473:45;;528:8;:21;;;550:24;;528:47;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;528:47:0;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;528:47:0;;;;213:1;188:26;407:175;:::o;110:39::-;;;;:::o;84:20::-;;;;;;;;;;;;;:::o;289:112::-;206:5;;;;;;;;;;;192:19;;:10;:19;;;188:26;;;385:9;358:24;:36;;;;188:26;289:112;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.5.16;\n\ncontract Migrations {\n    address public owner;\n    uint256 public last_completed_migration;\n\n    modifier restricted() {\n        if (msg.sender == owner) _;\n    }\n\n    constructor() public {\n        owner = msg.sender;\n    }\n\n    function setCompleted(uint256 completed) public restricted {\n        last_completed_migration = completed;\n    }\n\n    function upgrade(address new_address) public restricted {\n        Migrations upgraded = Migrations(new_address);\n        upgraded.setCompleted(last_completed_migration);\n    }\n}\n",
-  "sourcePath": "/Users/g721945/Main/cpe-course/CPE494-Blockchain/pet-shop-ultimate/contracts/Migrations.sol",
+  "sourcePath": "/Users/atreus/work/pet-shop-ultimate/contracts/Migrations.sol",
   "ast": {
     "absolutePath": "project:/contracts/Migrations.sol",
     "exportedSymbols": {
@@ -188,7 +188,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 258,
+                        "referencedDeclaration": 278,
                         "src": "192:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -292,7 +292,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 258,
+                        "referencedDeclaration": 278,
                         "src": "266:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -873,7 +873,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 258,
+                                  "referencedDeclaration": 278,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -1010,7 +1010,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 258,
+                                  "referencedDeclaration": 278,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -1469,12 +1469,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xa42D6a97c536c57616Ce64970Ad25dc2Eb2851A7",
-      "transactionHash": "0xd72594ef103be5d4ab1c5e404f814925dd92f94e09bd8442786b85a56d7673fb"
+      "address": "0x73532E86b1a38f93D5015461868dDFA3Bf0cd32f",
+      "transactionHash": "0x728cf3c8e080b0f3224899456d227f4d4ae3b628e95e73cdaafe2af61eb802f5"
     }
   },
-  "schemaVersion": "3.4.7",
-  "updatedAt": "2022-04-26T17:54:08.728Z",
+  "schemaVersion": "3.4.6",
+  "updatedAt": "2022-04-27T03:12:41.821Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
