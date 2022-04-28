@@ -1,4 +1,8 @@
-# Getting Started with Create React App
+# Getting Started with PokemonShop
+
+## First run scripts
+
+### `npm install && truffle compile && truffle migrate --reset`
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
