@@ -10,6 +10,7 @@ import BackCard from "../../images/back_card.jpg";
 function Profile() {
   const [pokemonTaken, setPokemonTaken] = React.useState([]);
   const [pokemonDefend, setPokemonDefend] = React.useState([]);
+  const [isUpdate, setIsUpdate] = React.useState(false);
 
   const [context, setContext] = useContext(Context);
 
@@ -22,6 +23,7 @@ function Profile() {
   useEffect(() => {
     fetchPokemonTaken();
     fetchPokemonDefend();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contract]);
 
@@ -63,7 +65,7 @@ function Profile() {
           pokemonTaken.push(index);
         }
       });
-      console.log(pokemonTaken);
+
       setPokemonTaken(pokemonTaken);
     }
   }
@@ -89,6 +91,10 @@ function Profile() {
                 if (transactionHash) {
                   // Completed
                   console.log(transactionHash);
+                  const newPokemonDefend = [...pokemonDefend];
+                  newPokemonDefend[index] = id;
+                  console.log(`addPokemonDefend: ${newPokemonDefend}`);
+                  setPokemonDefend(newPokemonDefend);
                   resolve();
                 }
                 if (error) {
@@ -110,6 +116,11 @@ function Profile() {
             { from: account },
             (error, transactionHash) => {
               if (transactionHash) {
+                const newPokemonDefend = [...pokemonDefend];
+                newPokemonDefend[index] = -1;
+                console.log(`removePokemonDefend: ${newPokemonDefend}`);
+                setPokemonDefend(newPokemonDefend);
+
                 resolve();
               }
               if (error) {
@@ -180,8 +191,9 @@ function Profile() {
                 Pokémon Defender
               </div>
               <div className="grid grid-cols-3 gap-12 max-w-screen-lg m-auto h-[490px]">
-                {pokemonDefend.map((pokemonId, index) => {
-                  if (pokemonId !== -1) {
+                {pokemonDefend.map((id, index) => {
+                  if (id !== -1) {
+                    const pokemonId = id + 1;
                     return (
                       <div
                         key={`pokecard__${index + 888}`}
@@ -330,8 +342,10 @@ function Profile() {
 
                       <div className="flex justify-between items-center">
                         <div className="text-neutral-400"># {data.id}</div>
+
                         <button
                           onClick={() => addPokemonDefend(data.id)}
+                          disabled={pokemonDefend.includes(data.id - 1)}
                           className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                         >
                           <img className="h-6" src={Pokeball} alt="Pokeball" />

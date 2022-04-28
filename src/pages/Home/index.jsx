@@ -114,7 +114,9 @@ function Home() {
     <>
       <header className="h-16 shadow-lg fixed w-full bg-white">
         <div className="max-w-screen-xl m-auto flex justify-between items-center h-full">
-          <div className="text-xl font-medium">Pokémon Shop</div>
+          <div className="text-xl font-medium">
+            <Link to={"/"}>Pokémon Shop</Link>
+          </div>
           <div className="flex space-x-4">
             {!account ? (
               <button
