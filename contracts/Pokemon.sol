@@ -22,7 +22,11 @@ contract Pokemon {
     }
 
     // function catchPokemon(uint256 _pokemonId, uint256 _amount) public payable {
-    function catchPokemon(uint256 _pokemonId, uint256 _amount) public payable {
+    function catchPokemon(uint256 _pokemonId, uint256 _amount)
+        public
+        payable
+        returns (uint256)
+    {
         uint256 _pokeId = _pokemonId - 1;
         require(msg.value == _amount, "Need to send exact amount of wei");
         require(owners[_pokeId] != msg.sender);
@@ -31,13 +35,14 @@ contract Pokemon {
 
         owners[_pokeId] = msg.sender;
         emit Buying(msg.sender, _pokeId);
+        return _pokeId + 1;
     }
 
     function addDefender(
         address _owner,
         uint256 _index,
         uint256 _pokemonId
-    ) public {
+    ) public returns (uint256) {
         uint256 _pokeId = _pokemonId - 1;
         require(_index >= 0 && _index <= 2);
         require(owners[_pokeId] == msg.sender);
@@ -46,7 +51,7 @@ contract Pokemon {
         require(_pokeId >= 0 && _pokeId <= pokemonAmount);
         // Need to +1 because of initial array value = 0
         defenders[_owner][_index] = _pokeId + 1;
-        
+        return _pokeId + 1;
     }
 
     function removeDefender(address _owner, uint256 _index) public {
