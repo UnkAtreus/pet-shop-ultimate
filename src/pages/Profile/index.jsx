@@ -5,12 +5,11 @@ import PokemonContract from "../../contracts/Pokemon.json";
 import { pokemon } from "../../data/pokemon2";
 import { Link } from "react-router-dom";
 import { Context } from "../../utilities/context";
-import BackCard from "../../images/back_card.jpg";
+import { toast } from "react-toastify";
 
 function Profile() {
   const [pokemonTaken, setPokemonTaken] = React.useState([]);
   const [pokemonDefend, setPokemonDefend] = React.useState([]);
-  const [isUpdate, setIsUpdate] = React.useState(false);
 
   const [context, setContext] = useContext(Context);
 
@@ -252,7 +251,13 @@ function Profile() {
                               # {pokemon[pokemonId].id}
                             </div>
                             <button
-                              onClick={() => removePokemonDefend(index)}
+                              onClick={() =>
+                                toast.promise(removePokemonDefend(index), {
+                                  pending: "Removing...",
+                                  success: "Removed Successfully",
+                                  error: "Remove failed",
+                                })
+                              }
                               className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                             >
                               <img
@@ -341,7 +346,13 @@ function Profile() {
                         <div className="text-neutral-400"># {data.id}</div>
 
                         <button
-                          onClick={() => addPokemonDefend(data.id)}
+                          onClick={() =>
+                            toast.promise(addPokemonDefend(data.id), {
+                              pending: "Adding...",
+                              success: "Added Successfully",
+                              error: "Add failed",
+                            })
+                          }
                           disabled={pokemonDefend.includes(data.id - 1)}
                           className="hover:bg-opacity-90 transition-all duration-200 flex items-center justify-center bg-pink-400 disabled:bg-gray-300 text-white px-4 py-2 gap-2 text-base rounded-lg"
                         >
